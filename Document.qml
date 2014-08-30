@@ -55,13 +55,31 @@ QtObject {
         register()
     }
 
+    property bool _disabled
+
     function register() {
         _properties.forEach(function(prop) {
             print('Connecting to', prop)
             doc[prop + 'Changed'].connect(function() {
-                print(prop + " changed to " + doc[prop])
-                _db.set(doc, prop, doc[prop])
+                if (!_disabled) {
+                    print(prop + " changed to " + doc[prop])
+                    _disabled = true
+                    _db.set(doc, prop, doc[prop])
+                    _disabled = false
+                }
             })
+        })
+
+        _db.objectChanged.connect(function(type, docId, key, value) {
+            if (type === doc._type && docId === doc._id && key !== 'new' && !_disabled) {
+                _disabled = true
+
+                print('NOTIFY --> ' + key + " changed to " + value)
+
+                doc[key] = value
+
+                _disabled = false
+            }
         })
     }
 

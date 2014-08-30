@@ -19,6 +19,10 @@ ListModel {
         reload()
     }
 
+    function at(index) {
+        return get(index).modelData
+    }
+
     function remove(type, docId) {
         if (type == model.type && docIDs.indexOf(docId) !== -1)
             removeDoc(docId)

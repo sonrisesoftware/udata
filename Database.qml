@@ -14,7 +14,7 @@ Item {
     signal loaded()
     signal update(var tx, var oldVersion)
 
-    signal objectChanged(var type, var docId)
+    signal objectChanged(var type, var docId, var key, var value)
     signal objectRemoved(var type, var docId)
 
     property var registeredTypes: []
@@ -143,7 +143,7 @@ Item {
             print(sql)
             tx.executeSql(sql);
 
-            objectChanged(type._type, type._id)
+            objectChanged(type._type, type._id, field, value)
         });
     }
 
@@ -157,7 +157,7 @@ Item {
             print('INSERT OR REPLACE INTO %1 VALUES (\'%2\'%3)'.arg(type._type).arg(type._id).arg(args))
             tx.executeSql('INSERT OR REPLACE INTO %1 VALUES (\'%2\'%3)'.arg(type._type).arg(type._id).arg(args));
 
-            objectChanged(type._type, type._id)
+            objectChanged(type._type, type._id, 'new', '')
         });
     }
 
