@@ -7,12 +7,12 @@ Item {
     property var db
     property string name
     property string description
-    property string version: "1"
+    property int version: 1
 
     property var cache
 
     signal loaded()
-    signal update(var tx, var oldVersion)
+    signal upgrade(var tx, var oldVersion)
 
     signal objectChanged(var type, var docId, var key, var value)
     signal objectRemoved(var type, var docId)
@@ -81,15 +81,15 @@ Item {
 
         db = LocalStorage.openDatabaseSync(name, "", description, 100000);
 
-        if (db.version !== version) {
-            db.changeVersion(db.version, version, function (tx) {
+        if (String(db.version) !== String(version)) {
+            db.changeVersion(String(db.version), String(version), function (tx) {
                 if (db.version === "") {
                     var sql = 'CREATE TABLE IF NOT EXISTS metadata(name TEXT UNIQUE, value TEXT)'
                     print("Creating db...")
                     tx.executeSql(sql);
                 }
 
-                update(tx, db.version)
+                upgrade(tx, Number(db.version))
             })
             db = LocalStorage.openDatabaseSync(name, "", description, 100000);
         }
