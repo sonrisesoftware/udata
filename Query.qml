@@ -5,6 +5,15 @@ ListModel {
 
     property string predicate: ""
     property string sortBy: "id"
+
+    /*!
+      This is necessary so that the ListView sections correctly update.
+
+      Set this property to the name of a property in your model object (it can
+      include subproperties, seperated by `.`), and then in your ListView, set
+      section.property to "section".
+     */
+    property string groupBy: ""
     property bool sortAscending: true
 
     property string type: "Document"
@@ -28,6 +37,7 @@ ListModel {
 
             if (docIDs.indexOf(docId) == -1) {
                 var obj = _db.loadWithData(type, docId, data, model)
+                print("Section[%1]".arg(groupBy), _get(obj, groupBy))
 
                 model.data[docId] = data
 
@@ -35,12 +45,12 @@ ListModel {
 
                 // Add it at the right location
                 if (sortBy == "") {
-                    model.append({'modelData': obj})
+                    model.append({'modelData': obj, "section": _get(obj, groupBy)})
                 } else {
                     sort()
 
                     var index = docIDs.indexOf(docId)
-                    model.insert(index, {'modelData': obj})
+                    model.insert(index, {'modelData': obj, "section": _get(obj, groupBy)})
                 }
             } else {
                 var currentIndex = docIDs.indexOf(docId)
@@ -51,6 +61,7 @@ ListModel {
                 var newIndex = docIDs.indexOf(docId)
 
                 model.move(currentIndex, newIndex, 1)
+                model.setProperty(newIndex, "section", _get(model.at(newIndex), groupBy))
             }
         })
 
@@ -106,12 +117,12 @@ ListModel {
 
                     // Add it at the right location
                     if (sortBy == "") {
-                        model.append({'modelData': obj})
+                        model.append({'modelData': obj, "section": _get(obj, groupBy)})
                     } else {
                         sort()
 
                         var index = docIDs.indexOf(docId)
-                        model.insert(index, {'modelData': obj})
+                        model.insert(index, {'modelData': obj, "section": _get(obj, groupBy)})
                     }
                 } else {
                     var currentIndex = docIDs.indexOf(docId)
@@ -122,6 +133,7 @@ ListModel {
                     var newIndex = docIDs.indexOf(docId)
 
                     model.move(currentIndex, newIndex, 1)
+                    model.setProperty(newIndex, "section", _get(model.at(newIndex), groupBy))
                 }
             } else {
                 print("Removing", docIDs.indexOf(docId))
@@ -161,7 +173,7 @@ ListModel {
         for (var i = 0; i < docIDs.length; i++) {
             var docId = docIDs[i]
             var obj = _db.loadWithData(type, docId, data[docId], model)
-            model.append({'modelData': obj})
+            model.append({'modelData': obj, "section": _get(obj, groupBy)})
         }
     }
 
