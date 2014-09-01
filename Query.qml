@@ -81,13 +81,21 @@ ListModel {
 
     Component.onCompleted: {
         _db.objectChanged.connect(model.update)
-        _db.objectRemoved.connect(model.remove)
+        _db.objectRemoved.connect(model.onRemove)
         print(type)
         reload()
     }
 
     function at(index) {
         return get(index).modelData
+    }
+
+    function onRemove(type, docId) {
+        print('Removing', docId, 'of type', type)
+        if (type == model.type) {
+            if (docIDs.indexOf(docId) !== -1)
+                _removeDoc(docId)
+        }
     }
 
     function update(type, docId) {

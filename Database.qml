@@ -147,6 +147,16 @@ Item {
         return result
     }
 
+    function remove(type, id) {
+        db.transaction( function(tx){
+            var sql = 'DELETE FROM %1 WHERE id == ?'.arg(type)
+            print(sql)
+            tx.executeSql(sql, [id]);
+
+            objectRemoved(type, id)
+        });
+    }
+
     function set(type, field, value) {
         var original = value
 

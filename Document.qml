@@ -12,6 +12,7 @@ QtObject {
 
     signal created
     signal loaded
+    signal removed
 
     property var _metadata
 
@@ -101,6 +102,11 @@ QtObject {
                 }
             })
         })
+    }
+
+    function remove() {
+        removed()
+        _db.remove(_type, _id)
     }
 
     function generateID() {
