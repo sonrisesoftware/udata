@@ -55,9 +55,17 @@ Item {
         var name = type._type
         var sql = 'CREATE TABLE IF NOT EXISTS %1(id TEXT UNIQUE%2)'
         var args = ''
-        type._properties.forEach(function(prop) {
-            args += ', ' + prop + ' TEXT'
-        })
+        for (var prop in type._metadata.properties) {
+            var sqlType = 'TEXT'
+            var jsType = type._metadata.properties[prop]
+            print(prop, jsType)
+
+            if (jsType == 'number' ||
+                    jsType == 'boolean')
+                sqlType = 'FLOAT'
+
+            args += ', ' + prop + ' ' + sqlType
+        }
 
         db.transaction(function(tx){
             tx.executeSql(sql.arg(name).arg(args));
@@ -110,7 +118,7 @@ Item {
 
         db.readTransaction(function(tx) {
             var sql = 'SELECT * FROM ' + type
-            if (query != "")
+            if (query != "" && query != undefined)
                 sql += ' WHERE ' + query
             print(sql)
 
@@ -138,12 +146,17 @@ Item {
     }
 
     function set(type, field, value) {
-        db.transaction( function(tx){
-            var sql = 'UPDATE %1 SET %2 = \'%3\' WHERE id==\'%4\''.arg(type._type).arg(field).arg(value).arg(type._id)
-            print(sql)
-            tx.executeSql(sql);
+        var original = value
 
-            objectChanged(type._type, type._id, field, value)
+        db.transaction( function(tx){
+            if (typeof(value) == 'object')
+                value = JSON.stringify(value)
+
+            var sql = 'UPDATE %1 SET %2 = ? WHERE id==?'.arg(type._type).arg(field)
+            print(sql)
+            tx.executeSql(sql, [value, type._id]);
+
+            objectChanged(type._type, type._id, field, original)
         });
     }
 
@@ -151,7 +164,11 @@ Item {
         db.transaction( function(tx) {
             var args = ''
             type._properties.forEach(function(prop) {
-                args += ', \'%1\''.arg(type[prop])
+                var value = type[prop]
+                if (typeof(value) == 'object')
+                    value = JSON.stringify(value)
+
+                args += ', \'%1\''.arg(value)
             })
 
             print('INSERT OR REPLACE INTO %1 VALUES (\'%2\'%3)'.arg(type._type).arg(type._id).arg(args))

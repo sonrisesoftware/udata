@@ -13,7 +13,11 @@ QtObject {
     signal created
     signal loaded
 
+    property var _metadata
+
     Component.onCompleted: {
+        initMetadata()
+
         _db.registerType(doc)
 
         if (!_id) {
@@ -34,6 +38,26 @@ QtObject {
         }
     }
 
+    function initMetadata() {
+        var type = {
+            'type': doc._type
+        }
+
+        var propertyInfo = {}
+        _properties.forEach(function(prop) {
+            var jsType = doc[prop] == undefined ? 'object' : typeof(doc[prop])
+
+            if (doc[prop] instanceof Array)
+                jsType = 'array'
+
+            propertyInfo[prop] = jsType
+        })
+
+        type['properties'] = propertyInfo
+
+        _metadata = type
+    }
+
     function load(data) {
         if (data === undefined) {
             _db.save(doc)
@@ -45,7 +69,11 @@ QtObject {
                 print(prop, "=", data[prop])
                 if (JSON.stringify(doc[prop]) !== JSON.stringify(data[prop])) {
                     print("  --> Loaded")
-                    doc[prop] = data[prop]
+
+                    if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
+                        doc[prop] = JSON.parse(data[prop])
+                    else
+                        doc[prop] = data[prop]
                 }
             }
         }
@@ -63,23 +91,10 @@ QtObject {
             doc[prop + 'Changed'].connect(function() {
                 if (!_disabled) {
                     print(prop + " changed to " + doc[prop])
-                    _disabled = true
+
                     _db.set(doc, prop, doc[prop])
-                    _disabled = false
                 }
             })
-        })
-
-        _db.objectChanged.connect(function(type, docId, key, value) {
-            if (type === doc._type && docId === doc._id && key !== 'new' && !_disabled) {
-                _disabled = true
-
-                print('NOTIFY --> ' + key + " changed to " + value)
-
-                doc[key] = value
-
-                _disabled = false
-            }
         })
     }
 

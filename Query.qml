@@ -5,6 +5,7 @@ ListModel {
 
     property string predicate: ""
     property string sortBy: "id"
+    property bool sortAscending: true
 
     property string type: "Document"
 
@@ -13,19 +14,69 @@ ListModel {
     property var docIDs: []
     property var data: {}
 
+    onPredicateChanged: {
+        if (_db === undefined)
+            return
+
+        var list = _db.query(type, predicate)
+        var newDocIDs = []
+
+        list.forEach(function (data) {
+            var docId = data.id
+
+            newDocIDs.push(docId)
+
+            if (docIDs.indexOf(docId) == -1) {
+                var obj = _db.loadWithData(type, docId, data, model)
+
+                model.data[docId] = data
+
+                docIDs.push(docId)
+
+                // Add it at the right location
+                if (sortBy == "") {
+                    model.append({'modelData': obj})
+                } else {
+                    sort()
+
+                    var index = docIDs.indexOf(docId)
+                    model.insert(index, {'modelData': obj})
+                }
+            } else {
+                var currentIndex = docIDs.indexOf(docId)
+
+                model.data[docId] = data
+                sort()
+
+                var newIndex = docIDs.indexOf(docId)
+
+                model.move(currentIndex, newIndex, 1)
+            }
+        })
+
+
+        // Remove any documents that are currently in the model but not in the query
+        var i = 0;
+        while (i < docIDs.length) {
+            var docId = docIDs[i]
+
+            if (newDocIDs.indexOf(docId) == -1) {
+                _removeDoc(docId)
+            } else {
+                i++
+            }
+        }
+    }
+
     Component.onCompleted: {
         _db.objectChanged.connect(model.update)
         _db.objectRemoved.connect(model.remove)
+        print(type)
         reload()
     }
 
     function at(index) {
         return get(index).modelData
-    }
-
-    function remove(type, docId) {
-        if (type == model.type && docIDs.indexOf(docId) !== -1)
-            removeDoc(docId)
     }
 
     function update(type, docId) {
@@ -73,15 +124,17 @@ ListModel {
                     model.move(currentIndex, newIndex, 1)
                 }
             } else {
+                print("Removing", docIDs.indexOf(docId))
                 if (docIDs.indexOf(docId) !== -1)
-                    removeDoc(docId)
+                    _removeDoc(docId)
             }
         }
     }
 
-    function removeDoc(docId) {
+    function _removeDoc(docId) {
+        print("Removing item from model...")
         model.remove(docIDs.indexOf(docId))
-        docIDs = docIDs.splice(docId, 1)
+        docIDs.splice(docIDs.indexOf(docId), 1)
         delete data[docId]
     }
 
@@ -90,6 +143,9 @@ ListModel {
 
         docIDs = []
         data = {}
+
+        if (_db == undefined)
+            return
 
         var matchingData = _db.query(type, predicate)
 
@@ -110,22 +166,33 @@ ListModel {
     }
 
     function sort() {
+        var list = sortBy.split(",")
 
         docIDs = docIDs.sort(function (b, a) {
-            print(a, b)
-            print(Object.keys(data))
-            var value1 = data[a][sortBy]
-            var value2 = data[b][sortBy]
-            if (typeof(value1) == 'boolean') {
-                print(sortBy, value1, value2, Number(value2) - Number(value1))
-                return Number(value2) - Number(value1)
-            } else if (typeof(value1) == 'string') {
-                print(sortBy, value1, value2, value2.localeCompare(value1))
+            for (var i = 0; i < list.length; i++) {
+                var prop = list[i]
 
-                return value2.localeCompare(value1)
-            } else {
-                print(sortBy, value1, value2, Number(value2) - Number(value1))
-                return Number(value2) - Number(value1)
+                var value1 = data[a][prop]
+                var value2 = data[b][prop]
+                var type = typeof(value1)
+
+                if (!isNaN(value1) && !isNaN(value2))
+                    type = 'number'
+
+                var sort = 0
+
+                if (type == 'boolean') {
+                    sort = Number(value2) - Number(value1)
+                } else if (type == 'string') {
+                    sort = value2.localeCompare(value1)
+                } else {
+                    sort = Number(value2) - Number(value1)
+                }
+
+                sort = sort * (sortAscending ? 1 : -1)
+
+                if (sort != 0)
+                    return sort
             }
         })
     }
