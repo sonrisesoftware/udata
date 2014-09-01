@@ -153,8 +153,8 @@ Item {
         db.transaction( function(tx){
             if (typeof(value) == 'object')
                 value = JSON.stringify(value)
-            else if (type._metadata.properties[field] == 'date')
-                value = value.toISOString()
+            //else if (type._metadata.properties[field] == 'date')
+            //    value = value.toISOString()
 
             var sql = 'UPDATE %1 SET %2 = ? WHERE id==?'.arg(type._type).arg(field)
             print(sql)

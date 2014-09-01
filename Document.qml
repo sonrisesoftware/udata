@@ -70,12 +70,13 @@ QtObject {
 
                 print(prop, "=", data[prop])
                 if (JSON.stringify(doc[prop]) !== JSON.stringify(data[prop])) {
-                    print("  --> Loaded")
+                    print("  --> Loaded", doc[prop])
 
-                    if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
+                    if (doc._metadata.properties[prop] == 'date') {
+                        var value = JSON.parse(data[prop])
+                        doc[prop] = value == null ? new Date("") : value
+                    } else if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
                         doc[prop] = JSON.parse(data[prop])
-                    else if (doc._metadata.properties[prop] == 'date')
-                        doc[prop] = new Date(data[prop])
                     else
                         doc[prop] = data[prop]
                 }
