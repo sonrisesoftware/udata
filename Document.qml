@@ -49,6 +49,8 @@ QtObject {
 
             if (doc[prop] instanceof Array)
                 jsType = 'array'
+            if (doc[prop] instanceof Date)
+                jsType = 'date'
 
             propertyInfo[prop] = jsType
         })
@@ -72,6 +74,8 @@ QtObject {
 
                     if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
                         doc[prop] = JSON.parse(data[prop])
+                    else if (doc._metadata.properties[prop] == 'date')
+                        doc[prop] = new Date(data[prop])
                     else
                         doc[prop] = data[prop]
                 }

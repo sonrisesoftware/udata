@@ -63,6 +63,8 @@ Item {
             if (jsType == 'number' ||
                     jsType == 'boolean')
                 sqlType = 'FLOAT'
+            if (jsType == 'date')
+                sqlType = 'DATE'
 
             args += ', ' + prop + ' ' + sqlType
         }
@@ -151,6 +153,8 @@ Item {
         db.transaction( function(tx){
             if (typeof(value) == 'object')
                 value = JSON.stringify(value)
+            else if (type._metadata.properties[field] == 'date')
+                value = value.toISOString()
 
             var sql = 'UPDATE %1 SET %2 = ? WHERE id==?'.arg(type._type).arg(field)
             print(sql)
@@ -167,6 +171,8 @@ Item {
                 var value = type[prop]
                 if (typeof(value) == 'object')
                     value = JSON.stringify(value)
+                else if (type._metadata.properties[prop] == 'date')
+                    value = value.toISOString()
 
                 args += ', \'%1\''.arg(value)
             })

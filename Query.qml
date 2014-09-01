@@ -178,6 +178,8 @@ ListModel {
 
                 if (!isNaN(value1) && !isNaN(value2))
                     type = 'number'
+                if (value1 instanceof Date)
+                    type = 'date'
 
                 var sort = 0
 
@@ -185,6 +187,8 @@ ListModel {
                     sort = Number(value2) - Number(value1)
                 } else if (type == 'string') {
                     sort = value2.localeCompare(value1)
+                } else if (type == 'date') {
+                    sort = value2 - value1
                 } else {
                     sort = Number(value2) - Number(value1)
                 }
