@@ -112,6 +112,26 @@ Item {
         print('Database open.')
     }
 
+    function countWithPredicate(type, predicate) {
+        var result = 0
+
+        if (registeredTypes.indexOf(type) == -1)
+            return result
+
+        db.readTransaction(function(tx) {
+            var sql = 'SELECT COUNT(*) AS count FROM ' + type
+            if (query != "" && query != undefined)
+                sql += ' WHERE ' + query
+            print(sql)
+
+            var rows = tx.executeSql(sql).rows
+
+            result = rows.item(i).count
+        })
+
+        return result
+    }
+
     function query(type, query) {
         var result = []
 

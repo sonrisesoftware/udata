@@ -29,6 +29,6 @@ QtObject {
         if (_db == undefined)
             return
 
-        count = _db.query(type, predicate).length
+        count = _db.countWithPredicate(type, predicate).length
     }
 }
