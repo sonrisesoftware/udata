@@ -10,6 +10,14 @@ Object {
     property string type
     property string predicate
 
+    property bool enabled: true
+    property bool updateNeeded: true
+
+    onEnabledChanged: {
+        if (enabled && updateNeeded)
+            timer.start()
+    }
+
     onPredicateChanged: timer.start()
     onTypeChanged: timer.start()
 
@@ -30,12 +38,19 @@ Object {
     Timer {
         id: timer
         interval: 10
-        onTriggered: reload()
+        onTriggered: {
+            if (enabled)
+                reload()
+            else
+                updateNeeded = true
+        }
     }
 
     function reload() {
         if (_db == undefined)
             return
+
+        updateNeeded = false
 
         count = _db.countWithPredicate(type, predicate)
     }
