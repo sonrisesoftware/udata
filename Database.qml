@@ -132,7 +132,7 @@ Item {
         return result
     }
 
-    function query(type, query) {
+    function queryWithPredicate(type, query) {
         var result = []
 
         if (registeredTypes.indexOf(type) == -1)
@@ -153,7 +153,7 @@ Item {
         return result
     }
 
-    function get(type, id) {
+    function getById(type, id) {
         var result
         db.readTransaction(function(tx) {
             var sql = 'SELECT * FROM %1 WHERE id==\'%2\''.arg(type).arg(id)
@@ -167,12 +167,12 @@ Item {
         return result
     }
 
-    function remove(type, id) {
+    function removeById(type, id) {
         removeWithPredicate(type, "id == '%1'".arg(id))
     }
 
     function removeWithPredicate(type, predicate) {
-        var list = query(type, predicate)
+        var list = queryWithPredicate(type, predicate)
 
         db.transaction( function(tx) {
             var sql = 'DELETE FROM %1'.arg(type)
@@ -205,7 +205,7 @@ Item {
         });
     }
 
-    function save(type) {
+    function saveObject(type) {
         db.transaction( function(tx) {
             var args = ''
             type._properties.forEach(function(prop) {
@@ -250,7 +250,7 @@ Item {
     /*
      * Used internally to load objects based on their IDs
      */
-    function load(type, id, parent) {
+    function loadById(type, id, parent) {
         return newObject(type, {_id: id, _type: type}, parent)
     }
 

@@ -27,7 +27,7 @@ ListModel {
         if (_db === undefined)
             return
 
-        var list = _db.query(type, predicate)
+        var list = _db.queryWithPredicate(type, predicate)
         var newDocIDs = []
 
         list.forEach(function (data) {
@@ -106,13 +106,13 @@ ListModel {
             var add = true
 
             if (predicate != "") {
-                var list = _db.query(type, "id == '%1' AND %2".arg(docId).arg(predicate))
+                var list = _db.queryWithPredicate(type, "id == '%1' AND %2".arg(docId).arg(predicate))
                 add = list.length > 0
 
                 if (add)
                     data = list[0]
             } else {
-                data = _db.query(type, "id == '%1'".arg(docId))[0]
+                data = _db.queryWithPredicate(type, "id == '%1'".arg(docId))[0]
             }
 
             if (add) {
@@ -167,7 +167,7 @@ ListModel {
         if (_db == undefined)
             return
 
-        var matchingData = _db.query(type, predicate)
+        var matchingData = _db.queryWithPredicate(type, predicate)
 
         matchingData.forEach(function (obj) {
             docIDs.push(obj.id)

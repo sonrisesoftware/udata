@@ -29,7 +29,7 @@ QtObject {
                 register()
             }
 
-            _db.save(doc)
+            _db.saveObject(doc)
         } else {
             if (!_delayLoad) {
                 var info = _db.get(doc._type, doc._id)
@@ -106,7 +106,7 @@ QtObject {
 
     function remove() {
         removed()
-        _db.remove(_type, _id)
+        _db.removeById(_type, _id)
     }
 
     function generateID() {
