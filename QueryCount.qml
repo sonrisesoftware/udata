@@ -1,6 +1,7 @@
 import QtQuick 2.0
+import "../qml-extras"
 
-QtObject {
+Object {
     id: query
 
     property var _db
@@ -9,26 +10,33 @@ QtObject {
     property string type
     property string predicate
 
-    onPredicateChanged: reload()
-    onTypeChanged: reload()
+    onPredicateChanged: timer.start()
+    onTypeChanged: timer.start()
 
     Component.onCompleted: {
         _db.objectChanged.connect(function (type, docId) {
-            if (type == query.type)
-                reload()
+            if (query && type == query.type)
+
+                timer.start()
         })
         _db.objectRemoved.connect(function (type, docId) {
-            if (type == query.type)
-                reload()
+            if (query && type == query.type)
+                timer.start()
         })
 
-        reload()
+        timer.start()
+    }
+
+    Timer {
+        id: timer
+        interval: 10
+        onTriggered: reload()
     }
 
     function reload() {
         if (_db == undefined)
             return
 
-        count = _db.countWithPredicate(type, predicate).length
+        count = _db.countWithPredicate(type, predicate)
     }
 }

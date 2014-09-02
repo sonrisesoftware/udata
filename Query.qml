@@ -92,7 +92,7 @@ ListModel {
 
     function onRemove(type, docId) {
         print('Removing', docId, 'of type', type)
-        if (type == model.type) {
+        if (model && type == model.type) {
             if (docIDs.indexOf(docId) !== -1)
                 _removeDoc(docId)
         }
@@ -100,7 +100,7 @@ ListModel {
 
     function update(type, docId) {
         print('Updating', docId, 'of type', type)
-        if (type == model.type) {
+        if (model && type == model.type) {
             var data
 
             var add = true

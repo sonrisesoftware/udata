@@ -120,13 +120,13 @@ Item {
 
         db.readTransaction(function(tx) {
             var sql = 'SELECT COUNT(*) AS count FROM ' + type
-            if (query != "" && query != undefined)
-                sql += ' WHERE ' + query
+            if (predicate != "" && predicate != undefined)
+                sql += ' WHERE ' + predicate
             print(sql)
 
             var rows = tx.executeSql(sql).rows
 
-            result = rows.item(i).count
+            result = rows.item(0).count
         })
 
         return result
@@ -168,13 +168,24 @@ Item {
     }
 
     function remove(type, id) {
-        db.transaction( function(tx){
-            var sql = 'DELETE FROM %1 WHERE id == ?'.arg(type)
-            print(sql)
-            tx.executeSql(sql, [id]);
+        removeWithPredicate(type, "id == '%1'".arg(id))
+    }
 
-            objectRemoved(type, id)
+    function removeWithPredicate(type, predicate) {
+        var list = query(type, predicate)
+
+        db.transaction( function(tx) {
+            var sql = 'DELETE FROM %1'.arg(type)
+            if (predicate != "" && predicate != undefined)
+                sql += ' WHERE ' + predicate
+            print(sql)
+
+            tx.executeSql(sql);
         });
+
+        list.forEach(function (obj) {
+            objectRemoved(type, obj.id)
+        })
     }
 
     function set(type, field, value) {
