@@ -12,7 +12,7 @@ Item {
     property var cache
 
     signal loaded()
-    signal upgrade(var tx, var oldVersion)
+    signal upgrade(var tx, var version)
 
     signal objectChanged(var type, var docId, var key, var value)
     signal objectRemoved(var type, var docId)

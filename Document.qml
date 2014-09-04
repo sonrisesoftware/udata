@@ -77,7 +77,7 @@ QtObject {
                         var value = JSON.parse(data[prop])
                         doc[prop] = value == null ? new Date("") : value
                     } else if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
-                        doc[prop] = JSON.parse(data[prop])
+                        doc[prop] = data[prop] == "undefined" ? undefined : JSON.parse(data[prop])
                     else
                         doc[prop] = data[prop]
                 }
