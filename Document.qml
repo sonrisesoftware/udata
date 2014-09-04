@@ -1,6 +1,7 @@
 import QtQuick 2.0
+import "../qml-extras"
 
-QtObject {
+Object {
     id: doc
 
     property string _id: ""
@@ -16,8 +17,19 @@ QtObject {
 
     property var _metadata
 
-    Component.onCompleted: {
+    Connections {
+        target: _db
+        onLoaded: init()
+    }
+
+    Component.onCompleted: init()
+
+    function init() {
         initMetadata()
+
+        if (!_db.dbOpen) {
+            return
+        }
 
         _db.registerType(doc)
 
@@ -32,7 +44,7 @@ QtObject {
             _db.saveObject(doc)
         } else {
             if (!_delayLoad) {
-                var info = _db.get(doc._type, doc._id)
+                var info = _db.getById(doc._type, doc._id)
 
                 load(info)
             }
@@ -63,7 +75,7 @@ QtObject {
 
     function load(data) {
         if (data === undefined) {
-            _db.save(doc)
+            _db.saveObject(doc)
         } else {
             for (var prop in data) {
                 if (prop === 'id' || prop.indexOf('_') === 0)

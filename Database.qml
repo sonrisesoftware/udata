@@ -10,6 +10,7 @@ Item {
     property int version: 1
 
     property var cache
+    property bool dbOpen
 
     signal loaded()
     signal upgrade(var tx, var version)
@@ -108,7 +109,10 @@ Item {
 
         print(JSON.stringify(cache))
 
+        dbOpen = true
+
         loaded()
+
         print('Database open.')
     }
 
