@@ -34,9 +34,9 @@ ListModel {
             var docId = data.id
 
             newDocIDs.push(docId)
+            var obj = _db.loadWithData(type, docId, data, model)
 
             if (docIDs.indexOf(docId) == -1) {
-                var obj = _db.loadWithData(type, docId, data, model)
                 print("Section[%1]".arg(groupBy), _get(obj, groupBy))
 
                 model.data[docId] = data
@@ -61,7 +61,9 @@ ListModel {
                 var newIndex = docIDs.indexOf(docId)
 
                 model.move(currentIndex, newIndex, 1)
-                model.setProperty(newIndex, "section", _get(model.at(newIndex), groupBy))
+                print("Replacing object at index", newIndex)
+                model.set(newIndex, {'modelData': obj, "section": _get(obj, groupBy)})
+//                model.setProperty(newIndex, "section", _get(model.at(newIndex), groupBy))
             }
         })
 
@@ -116,8 +118,8 @@ ListModel {
             }
 
             if (add) {
+                var obj = _db.loadWithData(type, docId, data, model)
                 if (docIDs.indexOf(docId) == -1) {
-                    var obj = _db.loadWithData(type, docId, data, model)
 
                     model.data[docId] = data
 
@@ -141,7 +143,9 @@ ListModel {
                     var newIndex = docIDs.indexOf(docId)
 
                     model.move(currentIndex, newIndex, 1)
-                    model.setProperty(newIndex, "section", _get(model.at(newIndex), groupBy))
+
+                    print("Replacing object at index", newIndex)
+                    model.set(newIndex, {'modelData': obj, "section": _get(obj, groupBy)})
                 }
             } else {
                 print("Removing", docIDs.indexOf(docId))
