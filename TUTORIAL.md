@@ -1,6 +1,20 @@
 uData
 =====
 
+###The Database###
+
+In your root QML file, define a instance of the `Database` type:
+
+    Database {
+        id: database
+
+        name: "demo-app"
+        description: "Demo app for uData"
+        modelPath: Qt.resolvedUrl("model")
+    }
+    
+The `name` and `description` properties are self-explanatory. `modelPath` refers to the directory where you define your model types, so uData knows where to look for them.
+
 ###Model Objects###
 
 The core part of uData is the model object. It's full QML object, so you get strongly typed properties, property change signals, bindings, and functions.
@@ -37,6 +51,7 @@ For example, if we want to display all our tasks that haven't been completed yet
 
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
         predicate: "completed==0"
@@ -46,6 +61,7 @@ Or we could not set a predicate, and display all tasks:
 
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
     }
@@ -65,6 +81,7 @@ Right now, our tasks list is sorted randomly. But it doesn't have to be. We can 
 
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
         sortBy: "title"
@@ -75,6 +92,7 @@ Or by completion status:
 
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
         sortBy: "completed"
@@ -84,6 +102,7 @@ Or sort by completion status then by title:
     
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
         sortBy: "completed,title"
@@ -111,6 +130,7 @@ Now, in our Query, add the `groupBy` property:
 
     Query {
         id: tasksModel
+        _db: database
         
         type: "Task"
         sortBy: "completed,title"
