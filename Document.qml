@@ -96,9 +96,9 @@ Object {
             }
         }
 
-        loaded()
-
         register()
+
+        loaded()
     }
 
     property bool _disabled

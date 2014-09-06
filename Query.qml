@@ -23,8 +23,10 @@ ListModel {
     property var docIDs: []
     property var data: {}
 
+    property bool finishedLoading
+
     onPredicateChanged: {
-        if (_db === undefined)
+        if (_db === undefined || !finishedLoading)
             return
 
         var list = _db.queryWithPredicate(type, predicate)
@@ -94,7 +96,7 @@ ListModel {
 
     function onRemove(type, docId) {
         print('Removing', docId, 'of type', type)
-        if (model && type == model.type) {
+        if (model && finishedLoading && type == model.type) {
             if (docIDs.indexOf(docId) !== -1)
                 _removeDoc(docId)
         }
@@ -102,7 +104,7 @@ ListModel {
 
     function update(type, docId) {
         print('Updating', docId, 'of type', type)
-        if (model && type == model.type) {
+        if (model && finishedLoading && type == model.type) {
             var data
 
             var add = true
@@ -187,6 +189,8 @@ ListModel {
             var obj = _db.loadWithData(type, docId, data[docId], model)
             model.append({'modelData': obj, "section": _get(obj, groupBy)})
         }
+
+        finishedLoading = true
     }
 
     function sort() {
