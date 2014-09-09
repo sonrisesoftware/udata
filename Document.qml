@@ -77,19 +77,22 @@ Object {
         if (data === undefined) {
             _db.saveObject(doc)
         } else {
+            print(JSON.stringify(data))
             for (var prop in data) {
                 if (prop === 'id' || prop.indexOf('_') === 0)
                     continue
 
-                print(prop, "=", data[prop])
+                _db.debug(prop, "=", data[prop])
                 if (JSON.stringify(doc[prop]) !== JSON.stringify(data[prop])) {
-                    print("  --> Loaded", doc[prop])
+                    _db.debug("  --> Loaded", doc[prop])
 
                     if (doc._metadata.properties[prop] == 'date') {
                         var value = JSON.parse(data[prop])
                         doc[prop] = value == null ? new Date("") : value
                     } else if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
                         doc[prop] = data[prop] == "undefined" ? undefined : JSON.parse(data[prop])
+                    else if (typeof(doc[prop]) == "string")
+                        doc[prop] = data[prop] == null ? "" : data[prop]
                     else
                         doc[prop] = data[prop]
                 }
@@ -105,10 +108,10 @@ Object {
 
     function register() {
         _properties.forEach(function(prop) {
-            print('Connecting to', prop)
+            _db.debug('Connecting to', prop)
             doc[prop + 'Changed'].connect(function() {
                 if (!_disabled) {
-                    print(prop + " changed to " + doc[prop])
+                    _db.debug(prop + " changed to " + doc[prop])
 
                     _db.set(doc, prop, doc[prop])
                 }
@@ -133,7 +136,7 @@ Object {
                    s4() + '-' + s4() + s4() + s4();
           };
         })()();
-        print(guid)
+        _db.debug(guid)
         return guid
     }
 }

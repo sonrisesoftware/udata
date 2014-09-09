@@ -83,7 +83,13 @@ ListModel {
         }
     }
 
-    Component.onCompleted: {
+    Component.onCompleted: init()
+
+    function init () {
+        if (finishedLoading)
+            return
+
+        print("Loading query...")
         _db.objectChanged.connect(model.update)
         _db.objectRemoved.connect(model.onRemove)
         print(type)
@@ -170,6 +176,8 @@ ListModel {
         docIDs = []
         data = {}
 
+
+        print("Empty db")
         if (_db == undefined)
             return
 

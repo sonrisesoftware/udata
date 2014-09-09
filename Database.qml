@@ -44,6 +44,14 @@ Item {
         return cache.hasOwnProperty(name)
     }
 
+    function execSQL(sql, args) {
+        if (!args)
+            args = []
+        db.transaction( function(tx){
+            tx.executeSql(sql, args);
+        });
+    }
+
     function registerType(type) {
         if (registeredTypes.indexOf(type._type) != -1)
             return
@@ -73,6 +81,15 @@ Item {
         db.transaction(function(tx){
             tx.executeSql(sql.arg(name).arg(args));
         });
+    }
+
+    function clear() {
+        registeredTypes.forEach(function(type) {
+            execSQL("DROP TABLE " + type)
+        })
+
+        registeredTypes = []
+        _set("registeredType", registeredTypes)
     }
 
     function open() {
@@ -211,7 +228,8 @@ Item {
 
     function saveObject(type) {
         db.transaction( function(tx) {
-            var args = ''
+            var args = [type._id]
+            var argsFormat = "?"
             type._properties.forEach(function(prop) {
                 var value = type[prop]
                 if (typeof(value) == 'object')
@@ -219,11 +237,12 @@ Item {
                 else if (type._metadata.properties[prop] == 'date')
                     value = value.toISOString()
 
-                args += ', \'%1\''.arg(value)
+                args.push(value)
+                argsFormat += ", ?"
             })
+            print(JSON.stringify(args))
 
-            print('INSERT OR REPLACE INTO %1 VALUES (\'%2\'%3)'.arg(type._type).arg(type._id).arg(args))
-            tx.executeSql('INSERT OR REPLACE INTO %1 VALUES (\'%2\'%3)'.arg(type._type).arg(type._id).arg(args));
+            tx.executeSql('INSERT OR REPLACE INTO %1 VALUES (%2)'.arg(type._type).arg(argsFormat), args);
 
             objectChanged(type._type, type._id, 'new', '')
         });
@@ -233,7 +252,7 @@ Item {
         return type._id !== "" && get(type) !== undefined
     }
 
-    Component.onCompleted: open()
+    Component.onCompleted: if (db == undefined) open()
 
     /*
      * Call this to create a new model object
@@ -293,5 +312,12 @@ Item {
         }
 
         return component.createObject(parent, args);
+    }
+
+    property bool debugMode
+
+    function debug(msg) {
+        if (debugMode)
+            print(msg)
     }
 }
