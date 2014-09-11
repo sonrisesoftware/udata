@@ -153,8 +153,10 @@ Item {
         return result
     }
 
-    function queryWithPredicate(type, query) {
+    function queryWithPredicate(type, query, args) {
         var result = []
+
+        if (!args) args = []
 
         if (registeredTypes.indexOf(type) == -1)
             return result
@@ -165,7 +167,7 @@ Item {
                 sql += ' WHERE ' + query
             print(sql)
 
-            var rows = tx.executeSql(sql).rows
+            var rows = tx.executeSql(sql, args).rows
             for(var i = 0; i < rows.length; i++) {
                 result.push(rows.item(i))
             }
@@ -213,10 +215,10 @@ Item {
         var original = value
 
         db.transaction( function(tx){
-            if (typeof(value) == 'object')
+            if (type._metadata.properties[field] == 'date')
+                value = value.toISOString()
+            else if (typeof(value) == 'object')
                 value = JSON.stringify(value)
-            //else if (type._metadata.properties[field] == 'date')
-            //    value = value.toISOString()
 
             var sql = 'UPDATE %1 SET %2 = ? WHERE id==?'.arg(type._type).arg(field)
             print(sql)
@@ -231,10 +233,10 @@ Item {
             var args = "'%1'".arg(type._id)
             type._properties.forEach(function(prop) {
                 var value = type[prop]
-                if (typeof(value) == 'object')
-                    value = JSON.stringify(value)
-                else if (type._metadata.properties[prop] == 'date')
+                if (type._metadata.properties[prop] == 'date')
                     value = value.toISOString()
+                else if (typeof(value) == 'object')
+                    value = JSON.stringify(value)
 
                 args += ", '%1'".arg(value)
             })

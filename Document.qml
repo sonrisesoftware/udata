@@ -10,6 +10,7 @@ Object {
     property bool _delayLoad: false
 
     property var _db
+    property bool isLoaded
 
     signal created
     signal loaded
@@ -87,7 +88,8 @@ Object {
                     _db.debug("  --> Loaded", doc[prop])
 
                     if (doc._metadata.properties[prop] == 'date') {
-                        var value = JSON.parse(data[prop])
+                        var value = new Date(data[prop])
+                        print("Value: ", data[prop], value)
                         doc[prop] = value == null ? new Date("") : value
                     } else if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
                         doc[prop] = data[prop] == "undefined" ? undefined : JSON.parse(data[prop])
@@ -102,6 +104,8 @@ Object {
         register()
 
         loaded()
+
+        isLoaded = true
     }
 
     property bool _disabled
@@ -138,5 +142,15 @@ Object {
         })()();
         _db.debug(guid)
         return guid
+    }
+
+    function toJSON() {
+        var json = {}
+
+        _properties.forEach(function(prop) {
+            json[prop] = doc[prop]
+        })
+
+        return JSON.parse(JSON.stringify(json))
     }
 }
