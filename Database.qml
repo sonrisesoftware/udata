@@ -228,8 +228,7 @@ Item {
 
     function saveObject(type) {
         db.transaction( function(tx) {
-            var args = [type._id]
-            var argsFormat = "?"
+            var args = "'%1'".arg(type._id)
             type._properties.forEach(function(prop) {
                 var value = type[prop]
                 if (typeof(value) == 'object')
@@ -237,12 +236,11 @@ Item {
                 else if (type._metadata.properties[prop] == 'date')
                     value = value.toISOString()
 
-                args.push(value)
-                argsFormat += ", ?"
+                args += ", '%1'".arg(value)
             })
-            print(JSON.stringify(args))
+            print(args)
 
-            tx.executeSql('INSERT OR REPLACE INTO %1 VALUES (%2)'.arg(type._type).arg(argsFormat), args);
+            tx.executeSql('INSERT OR REPLACE INTO %1 VALUES (%2)'.arg(type._type).arg(args));
 
             objectChanged(type._type, type._id, 'new', '')
         });
