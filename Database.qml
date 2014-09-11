@@ -1,5 +1,6 @@
 import QtQuick 2.0
 import QtQuick.LocalStorage 2.0
+import "../qml-extras/dateutils.js" as DateUtils
 
 Item {
     id: database
@@ -216,7 +217,7 @@ Item {
 
         db.transaction( function(tx){
             if (type._metadata.properties[field] == 'date')
-                value = value.toISOString()
+                value = DateUtils.isValid(value) ? value.toISOString() : ""
             else if (typeof(value) == 'object')
                 value = JSON.stringify(value)
 
@@ -234,7 +235,7 @@ Item {
             type._properties.forEach(function(prop) {
                 var value = type[prop]
                 if (type._metadata.properties[prop] == 'date')
-                    value = value.toISOString()
+                    value = DateUtils.isValid(value) ? value.toISOString() : ""
                 else if (typeof(value) == 'object')
                     value = JSON.stringify(value)
 
