@@ -91,9 +91,10 @@ Object {
                         var value = new Date(data[prop])
                         print("Value: ", data[prop], value)
                         doc[prop] = value == null ? new Date("") : value
-                    } else if (doc[prop] == undefined || typeof(doc[prop]) == 'object')
+                    } else if (doc._metadata.properties[prop] == 'object') {
+                        print("Property", prop, data[prop], typeof(doc[prop]))
                         doc[prop] = data[prop] == "undefined" ? undefined : JSON.parse(data[prop])
-                    else if (typeof(doc[prop]) == "string")
+                    } else if (doc._metadata.properties[prop] == 'string')
                         doc[prop] = data[prop] == null ? "" : data[prop]
                     else
                         doc[prop] = data[prop]

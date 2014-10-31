@@ -155,6 +155,7 @@ Item {
     }
 
     function queryWithPredicate(type, query, args) {
+        print("Querying", query)
         var result = []
 
         if (!args) args = []
@@ -172,6 +173,26 @@ Item {
             for(var i = 0; i < rows.length; i++) {
                 result.push(rows.item(i))
             }
+        })
+
+        return result
+    }
+
+    function getByPredicate(type, query, args) {
+        var result
+
+        if (registeredTypes.indexOf(type) == -1)
+            return undefined
+
+        db.readTransaction(function(tx) {
+            var sql = 'SELECT * FROM ' + type
+            if (query != "" && query != undefined)
+                sql += ' WHERE ' + query
+            print(sql)
+
+            var rows = tx.executeSql(sql, args).rows
+
+            result = rows.length === 1 ? rows[0] : undefined
         })
 
         return result
@@ -276,6 +297,13 @@ Item {
      */
     function loadById(type, id, parent) {
         return newObject(type, {_id: id, _type: type}, parent)
+    }
+
+    function loadFromData(type, data, parent) {
+        var obj = newObject(type, {_id: data['id'], _type: type, _delayLoad: true}, parent)
+        obj.load(data)
+
+        return obj
     }
 
     /*

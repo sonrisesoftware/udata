@@ -18,7 +18,7 @@ ListModel {
 
     property string type: "Document"
 
-    property var _db
+    property Database _db
 
     property var docIDs: []
     property var data: {}
@@ -92,6 +92,7 @@ ListModel {
         print("Loading query...")
         _db.objectChanged.connect(model.update)
         _db.objectRemoved.connect(model.onRemove)
+        _db.loaded.connect(model.reload)
         print(type)
         reload()
     }
