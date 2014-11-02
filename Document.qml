@@ -20,21 +20,28 @@ Object {
 
     Connections {
         target: _db
-        onLoaded: init()
+        onLoaded: {
+            print('Database loaded, triggering doc load: ', _id)
+            init()
+        }
     }
 
     Component.onCompleted: init()
 
     function init() {
+        print('Loading document')
         initMetadata()
 
-        if (!_db.dbOpen) {
+        if (!_db.dbOpen || isLoaded) {
             return
         }
 
         _db.registerType(doc)
 
+        print('DB Open, loading')
+
         if (!_id) {
+            print('No ID, creating one')
             _id = generateID()
             created()
 
@@ -45,6 +52,7 @@ Object {
             _db.saveObject(doc)
         } else {
             if (!_delayLoad) {
+                print('Loading...')
                 var info = _db.getById(doc._type, doc._id)
 
                 load(info)
@@ -75,6 +83,7 @@ Object {
     }
 
     function load(data) {
+        print('Loading data:', JSON.stringify(data))
         if (data === undefined) {
             _db.saveObject(doc)
         } else {
