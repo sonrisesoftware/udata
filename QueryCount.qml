@@ -1,5 +1,5 @@
 import QtQuick 2.0
-import "../qml-extras"
+import Material.Extras 0.1
 
 Object {
     id: query

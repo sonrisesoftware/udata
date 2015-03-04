@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.LocalStorage 2.0
-import "../qml-extras/dateutils.js" as DateUtils
+import Material.Extras 0.1
 
 Item {
     id: database
